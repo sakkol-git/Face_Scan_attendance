@@ -18,6 +18,11 @@ def run_attendance_app(config: AppConfig) -> None:
     handle_recognized_face = build_face_recognized_handler(
         sheet,
         stop_after_success=config.stop_after_success,
+        upload_cooldown_seconds=config.upload_cooldown_seconds,
+        upload_max_retries=config.upload_max_retries,
+        upload_backoff_base_seconds=config.upload_backoff_base_seconds,
+        upload_backoff_max_seconds=config.upload_backoff_max_seconds,
+        fallback_csv_path=config.fallback_csv_path,
     )
 
     run_webcam_attendance(
@@ -25,7 +30,11 @@ def run_attendance_app(config: AppConfig) -> None:
         known_face_names=known_face_names,
         camera_index=config.camera_index,
         window_name=config.window_name,
-        scale_factor=config.scale_factor,
+        frame_scale=config.frame_scale,
         recognition_delay_seconds=config.recognition_delay_seconds,
+        recognition_threshold=config.recognition_threshold,
+        recognition_min_confidence=config.recognition_min_confidence,
+        process_every_n_frames=config.process_every_n_frames,
+        max_faces_per_frame=config.max_faces_per_frame,
         on_face_recognized=handle_recognized_face,
     )

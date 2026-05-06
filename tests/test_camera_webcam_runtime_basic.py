@@ -6,6 +6,7 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 
 from camera import webcam
+from camera.frame_processor import FrameProcessingResult
 
 
 class TestRunWebcamAttendanceBasic(unittest.TestCase):
@@ -47,7 +48,7 @@ class TestRunWebcamAttendanceBasic(unittest.TestCase):
     @patch("camera.runtime_loop.cv2.waitKey", return_value=-1)
     @patch("camera.runtime_loop.cv2.imshow")
     @patch("camera.runtime_loop.cv2.VideoCapture")
-    @patch("camera.runtime_loop._process_frame", return_value=True)
+    @patch("camera.runtime_loop._process_frame", return_value=FrameProcessingResult(True, []))
     def test_callback_true_stops_loop(
         self,
         mock_process_frame: MagicMock,

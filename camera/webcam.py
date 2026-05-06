@@ -24,9 +24,13 @@ def run_webcam_attendance(
     known_face_names: list[str],
     camera_index: int = 0,
     window_name: str = "Attendance System",
-    scale_factor: float = 0.25,
+    frame_scale: float = 0.25,
     recognition_delay_seconds: float = 3.0,
-    on_face_recognized: Callable[[str], bool | None] | None = None,
+    recognition_threshold: float = 0.6,
+    recognition_min_confidence: float = 0.5,
+    process_every_n_frames: int = 1,
+    max_faces_per_frame: int = 0,
+    on_face_recognized: Callable[[str], str | tuple[str, bool] | None] | None = None,
 ) -> None:
     """Run webcam loop and draw recognized faces.
 
@@ -35,10 +39,14 @@ def run_webcam_attendance(
         known_face_names: Name labels aligned with known_face_encodings.
         camera_index: OpenCV camera source index.
         window_name: Display window title.
-        scale_factor: Frame downscaling for performance.
+        frame_scale: Frame downscaling for performance.
         recognition_delay_seconds: Continuous recognition time before callback.
+        recognition_threshold: Face distance threshold used for matches.
+        recognition_min_confidence: Minimum confidence required to accept a match.
+        process_every_n_frames: Run recognition every N frames.
+        max_faces_per_frame: Limit face detection count per frame (0 = no limit).
         on_face_recognized: Optional callback called for each recognized name.
-            Return True from callback to stop the webcam loop.
+            Return ("uploaded", True) to stop the webcam loop.
     """
     normalized_encodings, normalized_names = normalize_known_faces(known_face_encodings, known_face_names)
     if len(normalized_encodings) != len(known_face_encodings) or len(normalized_names) != len(known_face_names):
@@ -53,7 +61,11 @@ def run_webcam_attendance(
         known_face_names=normalized_names,
         camera_index=camera_index,
         window_name=window_name,
-        scale_factor=scale_factor,
+        frame_scale=frame_scale,
+        recognition_threshold=recognition_threshold,
+        recognition_min_confidence=recognition_min_confidence,
+        process_every_n_frames=process_every_n_frames,
+        max_faces_per_frame=max_faces_per_frame,
         recognition_delay_seconds=recognition_delay_seconds,
         on_face_recognized=on_face_recognized,
     )

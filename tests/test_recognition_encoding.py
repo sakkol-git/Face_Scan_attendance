@@ -29,22 +29,22 @@ class TestRecognitionEncoding(unittest.TestCase):
     ) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             folder = Path(temp_dir)
-            valid = folder / "alice.jpg"
-            no_face = folder / "bob.jpg"
-            bad = folder / "charlie.jpg"
-            nested = folder / "nested"
+            person_dir = folder / "Alice"
+            person_dir.mkdir()
+            valid = person_dir / "img1.jpg"
+            no_face = person_dir / "img2.jpg"
+            bad = person_dir / "img3.jpg"
 
             valid.write_text("x", encoding="utf-8")
             no_face.write_text("x", encoding="utf-8")
             bad.write_text("x", encoding="utf-8")
-            nested.mkdir()
 
             mock_load_image_file.side_effect = lambda file_path: file_path
 
             def fake_face_encodings(image):
-                if image.endswith("alice.jpg"):
+                if image.endswith("img1.jpg"):
                     return [["enc-alice"]]
-                if image.endswith("bob.jpg"):
+                if image.endswith("img2.jpg"):
                     return []
                 raise ValueError("decode failed")
 
@@ -53,7 +53,7 @@ class TestRecognitionEncoding(unittest.TestCase):
             encodings, names = load_known_faces(folder)
 
         self.assertEqual(encodings, [["enc-alice"]])
-        self.assertEqual(names, ["alice"])
+        self.assertEqual(names, ["Alice"])
         mock_logger_warning.assert_called()
         mock_logger_exception.assert_called_once()
 
@@ -66,29 +66,31 @@ class TestRecognitionEncoding(unittest.TestCase):
     ) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             folder = Path(temp_dir)
-            (folder / "alice.jpg").write_text("x", encoding="utf-8")
-            (folder / "readme.txt").write_text("x", encoding="utf-8")
+            person_dir = folder / "Alice"
+            person_dir.mkdir()
+            (person_dir / "img1.jpg").write_text("x", encoding="utf-8")
+            (person_dir / "readme.txt").write_text("x", encoding="utf-8")
 
             encodings, names = load_known_faces(folder)
 
         self.assertEqual(encodings, [["enc-alice"]])
-        self.assertEqual(names, ["alice"])
+        self.assertEqual(names, ["Alice"])
         mock_load_image_file.assert_called_once()
         mock_face_encodings.assert_called_once()
 
-    @patch("recognition.encoding.iter_face_files", side_effect=PermissionError("denied"))
+    @patch("recognition.encoding.iter_face_dataset", side_effect=PermissionError("denied"))
     @patch("recognition.encoding.logger.exception")
     def test_load_known_faces_handles_listing_failure(
         self,
         mock_logger_exception,
-        mock_iter_face_files,
+        mock_iter_face_dataset,
     ) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             encodings, names = load_known_faces(temp_dir)
 
         self.assertEqual(encodings, [])
         self.assertEqual(names, [])
-        mock_iter_face_files.assert_called_once()
+        mock_iter_face_dataset.assert_called()
         mock_logger_exception.assert_called_once()
 
 

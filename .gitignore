@@ -8,6 +8,9 @@ venv/
 .venv/
 env/
 
+# Dataset and model files
+known_faces/
+
 # Build/test artifacts
 .pytest_cache/
 .mypy_cache/
